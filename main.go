@@ -21,6 +21,7 @@ const (
 	keyRepositories         = "REPOSITORIES"
 	keyGithubToken          = "GITHUB_TOKEN"
 	keyEnvironments         = "ENVIRONMENTS"
+	keyVerbose              = "VERBOSE"
 )
 
 type Config struct {
@@ -33,20 +34,20 @@ type Config struct {
 }
 
 type Organization struct {
-	Name         string
-	Repositories []Repository
+	Name         string       `json:"name"`
+	Repositories []Repository `json:"repositories"`
 }
 
 type Repository struct {
-	Name         string
-	Error        string
-	Dirty        bool
-	Environments []Environment
+	Name         string        `json:"name"`
+	Error        string        `json:"error"`
+	Dirty        bool          `json:"dirty"`
+	Environments []Environment `json:"environments"`
 }
 
 type Environment struct {
-	Name    string
-	Version string
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 func main() {
@@ -59,9 +60,19 @@ func main() {
 	flag.StringVar(&config.repositories, "repositories", LookupEnvOrString(keyRepositories, ""), "Repositories")
 	flag.StringVar(&config.githubToken, "githubToken", LookupEnvOrString(keyGithubToken, ""), "Github Token")
 	flag.StringVar(&config.environments, "environments", LookupEnvOrString(keyEnvironments, ""), "Environments")
+	verbose := flag.Int("verbose", LookupEnvOrInt(keyVerbose, 0), "Verbose")
+
+	logLevel := &slog.LevelVar{}
+	if verbose != nil {
+		if *verbose == 0 {
+			logLevel.Set(slog.LevelInfo)
+		} else {
+			logLevel.Set(slog.LevelDebug)
+		}
+	}
 	flag.Parse()
 
-	slog.InfoContext(ctx, "Configuration", "organization", config.organization, "targetRepository", config.targetRepository, "targetRepositoryFile", config.targetRepositoryFile, "repositories", config.repositories, "githubToken", "***", config.environments, config.environments)
+	slog.InfoContext(ctx, "Configuration", "organization", config.organization, "targetRepository", config.targetRepository, "targetRepositoryFile", config.targetRepositoryFile, "repositories", config.repositories, "githubToken", "***", config.environments, config.environments, "verbose", *verbose)
 
 	if config.organization == "" {
 		slog.ErrorContext(ctx, "Organization is required")
@@ -94,14 +105,25 @@ func main() {
 		return
 	}
 
-	organization := Organization{Name: config.organization}
+	organization := &Organization{Name: config.organization, Repositories: []Repository{}}
+	err := iterateRepositories(ctx, gh, config, organization)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to iterate repositories", "error", err)
+		return
+	}
+	err = render(ctx, organization)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to render organization", "error", err)
+	}
+}
+
+func iterateRepositories(ctx context.Context, gh *github.Client, config Config, organization *Organization) error {
 
 	// split config.repositories by comma
 	repos := strings.Split(config.repositories, ",")
 	for _, repo := range repos {
 		slog.InfoContext(ctx, "Processing repository", "organization", config.organization, "repository", repo)
 		repository := Repository{Name: repo}
-		organization.Repositories = append(organization.Repositories, repository)
 
 		repo, _, err := gh.Repositories.Get(ctx, config.organization, repo)
 		if err != nil {
@@ -111,15 +133,41 @@ func main() {
 		}
 
 		slog.DebugContext(ctx, "Repository", "organization", config.organization, "id", repo.GetID())
+		iterateEnvironments(ctx, gh, config, &repository)
+
+		organization.Repositories = append(organization.Repositories, repository)
 	}
 
-	err := render(ctx, organization)
-	if err != nil {
-		slog.ErrorContext(ctx, "Unable to render organization", "error", err)
-	}
+	return nil
 }
 
-func render(ctx context.Context, organization Organization) error {
+func iterateEnvironments(ctx context.Context, gh *github.Client, config Config, repository *Repository) {
+	// split config.environments by comma
+	envs := strings.Split(config.environments, ",")
+	environments := make([]Environment, len(envs))
+	for i, env := range envs {
+		slog.InfoContext(ctx, "Processing environment", "organization", config.organization, "repository", repository.Name, "environment", env)
+		environment := Environment{Name: env}
+		environments[i] = environment
+
+		deployments, _, err := gh.Repositories.ListDeployments(ctx, config.organization, repository.Name, nil)
+		if err != nil {
+			slog.ErrorContext(ctx, "Unable to list deployments", "organization", config.organization, "repository", repository.Name, "error", err)
+			environment.Version = err.Error()
+			continue
+		}
+
+		for _, deployment := range deployments {
+			if deployment.Environment != nil && *deployment.Environment == env {
+				environment.Version = deployment.GetSHA()
+				break
+			}
+		}
+	}
+	repository.Environments = environments
+}
+
+func render(ctx context.Context, organization *Organization) error {
 	// create json and print it
 	output, err := json.MarshalIndent(organization, "", "  ")
 	if err != nil {
