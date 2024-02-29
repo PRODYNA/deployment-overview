@@ -54,7 +54,42 @@ func main() {
 		slog.ErrorContext(ctx, "Unable to write file", "error", err)
 	} else {
 		slog.InfoContext(ctx, "File written", "file", filename)
-
 	}
 
+	// commit to github using the API
+	repo, _, err := gh.Repositories.Get(ctx, config.Organization, config.TargetRepository)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to get target repository", "error", err, "repository", config.TargetRepository, "organization", config.Organization)
+		return
+	}
+	defaultBranch := *repo.DefaultBranch
+
+	branch, _, err := gh.Repositories.GetBranch(ctx, config.Organization, config.TargetRepository, defaultBranch, 0)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to get branch", "error", err, "branch", defaultBranch)
+		return
+	}
+	slog.DebugContext(ctx, "Branch", "branch", branch, "repository", config.TargetRepository, "organization", config.Organization)
+
+	//	// create blob
+	//	blob, _, err := gh.Git.CreateBlob(ctx, config.Organization, config.TargetRepository, &github.Blob{
+	//		Content: &md,
+	//		Size:    github.Int(len(md)),
+	//	})
+	//	if err != nil {
+	//		slog.ErrorContext(ctx, "Unable to create blob", "error", err)
+	//		return
+	//	}
+	//
+	//	// create tree
+	//	tree, _, err := gh.Git.CreateTree(ctx, config.Organization, config.TargetRepository, *branch.Commit.SHA, []github.TreeEntry{
+	//		{
+	//			Path: github.String(config.TargetRepositoryFile),
+	//			Mode: github.String("100644"),
+	//			Type: github.String("blob"),
+	//			SHA:  blob.SHA,
+	//		},
+	//,	}
+	//
+	//
 }

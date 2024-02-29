@@ -4,38 +4,66 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/google/go-github/v59/github"
 	"github.com/prodyna/deployment-overview/config"
 	"log/slog"
 	"os"
+	"strings"
 	"text/template"
 )
 
 var markdownTemplate = `
-# {{.Name}}
+# YASM - Yet Another Skill Management
+
+Component Status overview
 
 {{range .Repositories}}
-## {{.Name}}
+## [{{.Name}}]({{.Link}})
 
 {{if .Error}}
 Error: {{.Error}}
 {{else}}
-- Latest Tag: {{.LatestTag}}
-- Commits After Tag: {{.CommitsAfterTag}}
-- Latest Release: {{.LatestRelease.Tag}} - {{.LatestRelease.Title}}
-- Open Pulls: {{.OpenPulls}}
+- Latest Release: {{.LatestRelease.Title}}
+
+{{if .Commits.Count}}
+### [Commits on {{.DefaultBranch}} after tag {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})
+{{range .Commits.Commits}}
+- [{{.Text}}]({{.Link}}) by [{{.Author.Name}}]({{.Author.Link}}) on {{.Timestamp}}
+{{end}}
+{{end}}
+
+{{if .PullRequests.Count}}
+### [Pull Requests]({{.PullRequests.Link}}) ({{.PullRequests.Count}})
+{{range .PullRequests.PullRequests}}
+- [{{.Title}}]({{.Link}})
+{{end}}
+{{end}}
 
 ### Environments
-{{range .Environments}}
-- {{.Name}}: {{.Version}}
+
+| Environment | {{range .Environments}} {{.Name}} | {{end}}
+| --- | {{range .Environments}} --- | {{end}}
+| Version | {{range .Environments}} {{.Version}} | {{end}}
+| Release | {{range .Environments}} {{if .IsRelease}}:heavy_check_mark:{{else}}:x:{{end}} | {{end}}
+| Current | {{range .Environments}} {{if .IsCurrent}}:heavy_check_mark:{{else}}:x:{{end}} | {{end}}
+
+{{if .Releases}}
+### Last releases
+{{range .Releases }}
+- [{{.Title}}]({{.Link}}) on {{.Timestamp}}
+{{end}}
 {{end}}
 {{end}}
 {{end}}
 `
 
 type Release struct {
-	Tag   string `json:"tag"`
-	Title string `json:"title"`
+	Tag       string           `json:"tag"`
+	SHA       string           `json:"sha"`
+	Title     string           `json:"title"`
+	Timestamp github.Timestamp `json:"timestamp"`
+	Link      string           `json:"link"`
 }
 
 type Organization struct {
@@ -44,19 +72,58 @@ type Organization struct {
 }
 
 type Repository struct {
-	Name            string        `json:"name"`
-	Error           string        `json:"error"`
-	Environments    []Environment `json:"environments"`
-	OpenPulls       int           `json:"openPulls"`
-	LatestTag       string        `json:"latestTag"`
-	CommitsAfterTag int           `json:"commitsAfterTag"`
-	LatestRelease   Release       `json:"latestRelease"`
-	Releases        []Release     `json:"releases"`
+	Name          string        `json:"name"`
+	Error         string        `json:"error"`
+	Environments  []Environment `json:"environments"`
+	LatestRelease Release       `json:"latestRelease"`
+	Releases      []Release     `json:"releases"`
+	PullRequests  PullRequests  `json:"pullRequests"`
+	Link          string        `json:"link"`
+	Commits       Commits       `json:"commits"`
+	DefaultBranch string        `json:"defaultBranch"`
+	Tags          []Tag         `json:"tags"`
+}
+
+type Tag struct {
+	Name string `json:"name"`
+	SHA  string `json:"sha"`
+}
+
+type Commits struct {
+	Link    string   `json:"link"`
+	Count   int      `json:"count"`
+	Commits []Commit `json:"commits"`
+}
+
+type Author struct {
+	Name string `json:"name"`
+	Link string `json:"link"`
+}
+
+type Commit struct {
+	Text      string           `json:"text"`
+	SHA       string           `json:"sha"`
+	Author    Author           `json:"author"`
+	Timestamp github.Timestamp `json:"timestamp"`
+	Link      string           `json:"link"`
 }
 
 type Environment struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name      string `json:"name"`
+	Version   string `json:"version"`
+	IsRelease bool   `json:"isRelease"`
+	IsCurrent bool   `json:"isCurrent"`
+}
+
+type PullRequests struct {
+	Link         string        `json:"link"`
+	Count        int           `json:"count"`
+	PullRequests []PullRequest `json:"pullRequests"`
+}
+
+type PullRequest struct {
+	Title string `json:"title"`
+	Link  string `json:"link"`
 }
 
 func (organization *Organization) IterateRepositories(ctx context.Context, gh *github.Client, config config.Config) error {
@@ -64,7 +131,10 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 	// split config.repositories by comma
 	for _, rep := range config.RepositoriesAsList() {
 		slog.InfoContext(ctx, "Processing repository", "organization", config.Organization, "repository", rep)
-		repository := Repository{Name: rep}
+		repository := Repository{
+			Name: rep,
+			Link: fmt.Sprintf("https://github.com/%s/%s", config.Organization, rep),
+		}
 
 		repo, _, err := gh.Repositories.Get(ctx, config.Organization, rep)
 		if err != nil {
@@ -72,6 +142,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			repository.Error = err.Error()
 			continue
 		}
+		repository.DefaultBranch = repo.GetDefaultBranch()
 
 		// get the latest release
 		release, _, err := gh.Repositories.GetLatestRelease(ctx, config.Organization, rep)
@@ -79,7 +150,12 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			slog.ErrorContext(ctx, "Unable to get latest release", "organization", config.Organization, "repository", rep, "error", err)
 			repository.Error = err.Error()
 		} else {
-			repository.LatestRelease = Release{Tag: release.GetTagName(), Title: release.GetName()}
+			repository.LatestRelease = Release{
+				Tag:       release.GetTagName(),
+				Title:     release.GetName(),
+				Link:      release.GetHTMLURL(),
+				Timestamp: release.GetPublishedAt(),
+			}
 		}
 
 		// get all releases
@@ -88,8 +164,16 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			slog.ErrorContext(ctx, "Unable to list releases", "organization", config.Organization, "repository", rep, "error", err)
 			repository.Error = err.Error()
 		} else {
-			for _, release := range releases {
-				repository.Releases = append(repository.Releases, Release{Tag: release.GetTagName(), Title: release.GetName()})
+			for i, release := range releases {
+				repository.Releases = append(repository.Releases, Release{
+					Tag:       release.GetTagName(),
+					Title:     release.GetName(),
+					Link:      release.GetHTMLURL(),
+					Timestamp: *release.CreatedAt,
+				})
+				if i == 2 {
+					break
+				}
 			}
 		}
 
@@ -99,7 +183,41 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			slog.ErrorContext(ctx, "Unable to list open pull requests", "organization", config.Organization, "repository", repo, "error", err)
 			repository.Error = err.Error()
 		} else {
-			repository.OpenPulls = len(pulls)
+			repository.PullRequests.Count = len(pulls)
+			repository.PullRequests.Link = fmt.Sprintf("https://github.com/%s/%s/pulls", config.Organization, rep)
+
+			for _, pull := range pulls {
+				repository.PullRequests.PullRequests = append(repository.PullRequests.PullRequests, PullRequest{
+					Title: pull.GetTitle(),
+					Link:  pull.GetHTMLURL(),
+				})
+			}
+		}
+
+		// get all commits since the latest release
+		commits, _, err := gh.Repositories.ListCommits(ctx, config.Organization, rep, &github.CommitsListOptions{
+			Since: repository.LatestRelease.Timestamp.Time,
+		})
+		if err != nil {
+			slog.ErrorContext(ctx, "Unable to list commits", "organization", config.Organization, "repository", rep, "error", err)
+			repository.Error = err.Error()
+		} else {
+			repository.Commits.Count = len(commits)
+			repository.Commits.Link = fmt.Sprintf("https://github.com/%s/%s/commits/%s", config.Organization, rep, repository.LatestRelease.Tag)
+			for _, commit := range commits {
+				message := commit.GetCommit().GetMessage()
+				firstLine := strings.Split(message, "\n")[0]
+				repository.Commits.Commits = append(repository.Commits.Commits, Commit{
+					Text: firstLine,
+					SHA:  commit.GetSHA(),
+					Author: Author{
+						Name: commit.GetAuthor().GetLogin(),
+						Link: fmt.Sprintf("https://github.com/%s", commit.GetAuthor().GetLogin()),
+					},
+					Timestamp: commit.GetCommit().GetAuthor().GetDate(),
+					Link:      fmt.Sprintf("https://github.com/%s/%s/commit/%s", config.Organization, rep, commit.GetSHA()),
+				})
+			}
 		}
 
 		slog.DebugContext(ctx, "Repository", "organization", config.Organization, "id", repo.GetID())
@@ -133,8 +251,15 @@ func (repository *Repository) IterateEnvironments(ctx context.Context, gh *githu
 				ref := deployment.GetRef()
 				if ref == "master" || ref == "main" {
 					environment.Version = deployment.GetSHA()[0:7]
+					environment.IsRelease = false
 				} else {
 					environment.Version = deployment.GetRef()
+					environment.IsRelease = true
+				}
+				if environment.Version == repository.LatestRelease.Tag {
+					environment.IsCurrent = true
+				} else {
+					environment.IsCurrent = false
 				}
 				repository.Environments = append(repository.Environments, environment)
 				break
@@ -166,4 +291,13 @@ func (organization *Organization) RenderMarkdown(ctx context.Context) (string, e
 		return "", err
 	}
 	return buffer.String(), nil
+}
+
+func (repository *Repository) HasTag(tagName string) bool {
+	for _, tag := range repository.Tags {
+		if tag.Name == tagName {
+			return true
+		}
+	}
+	return false
 }
