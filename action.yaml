@@ -6,6 +6,10 @@ inputs:
     description: 'List of the repositories to monitor'
     required: true
     default: ''
+  environments:
+    description: 'The list of environments to monitor'
+    required: true
+    default: 'dev,staging,prod'
   target-repo:
     description: 'The repository where the overview will be written to'
     required: true
@@ -13,7 +17,7 @@ inputs:
   target-repo-file:
     description: 'The file where the overview will be written to'
     required: true
-    default: '.github/README.md'
+    default: 'profile/README.md'
   github-token:
     description: 'The token to use for the GitHub API'
     required: true
