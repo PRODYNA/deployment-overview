@@ -35,15 +35,15 @@ go buid main.go -o deployment-overview
 
 ## Parrameters
 
-| Name | Paramter | Environment | Required | Defaul  | Description |
-| --- | --- | --- |-------| --- | --- |
-| GitHub Personal Access Token | --github-token | GITHUB_TOKEN | true  | - | The GitHub Personal Access Token (PAT) |
-| Environments | --environments | ENVIRONMENTS | true  | dev,staging,prod | Environments to query. Comma separated list. |
-| GitHub Organization | --organization | ORGANIZATION | true  | - | The GitHub Organization to query for repositories. |
-| Repositories | --repositories | REPOSITORIES | true  | - | Repositories to query. Comma separated list. |
-| Target Repository | --target-repository | TARGET_REPOSITORY | true  | - | The target repository to commit the result to. |
-| Target Repository File | --target-repository-file | TARGET_REPOSITORY_FILE | true  | - | The target repository file to commit the result to. |
-| Verbosity | --verbose | VERBOSE | false  | 1 | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| Paramter | Environment | Required | Defaul  | Description |
+| --- | --- |-------| --- | --- |
+| --github-token | GITHUB_TOKEN | true  | - | The GitHub Personal Access Token (PAT) |
+| --environments | ENVIRONMENTS | true  | dev,staging,prod | Environments to query. Comma separated list. |
+| --organization | ORGANIZATION | true  | - | The GitHub Organization to query for repositories. |
+| --repositories | REPOSITORIES | true  | - | Repositories to query. Comma separated list. |
+| --target-repository | TARGET_REPOSITORY | true  | - | The target repository to commit the result to. |
+| --target-repository-file | TARGET_REPOSITORY_FILE | true  | - | The target repository file to commit the result to. |
+| --verbose | VERBOSE | false  | 1 | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
 
 ## Use as GitHub Action
 
