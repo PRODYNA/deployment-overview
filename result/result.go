@@ -19,6 +19,11 @@ var markdownTemplate = `
 
 Component Status overview. Last update {{.LastUpdated}}
 
+| Repository | Commits | PRs | Latest Release | [dev](https://dev-yasm.prodyna.com) | [staging](https://dev-yasm.prodyna.com) | [prod](https://yasm.prodyna.com) |
+| --- | --- | --- | -- | --- | --- | --- |
+{{range .Repositories}}| [{{.Name}}]({{.Link}}) | {{if .Commits.Count}}:red_square:{{else}}:green_square:{{end}} {{.Commits.Count}} | {{if .PullRequests.Count}}:yellow_square:{{else}}:green_square:{{end}} {{.PullRequests.Count}} | {{.LatestRelease.Tag}} | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} {{.Version}} | {{end}}
+{{end}}
+
 {{range .Repositories}}
 ## [{{.Name}}]({{.Link}}) {{.LatestRelease.Tag}}
 
