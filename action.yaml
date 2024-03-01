@@ -31,7 +31,7 @@ runs:
     - --organization="${{ inputs.organization }}"
     - --repositories="${{ inputs.repositories }}"
     - --environments="${{ inputs.environments }}"
-    - --verbose="${{ inputs.verbose }}"
+    - --verbose=${{ inputs.verbose }}
     - --target-repo="${{ inputs.target-repo }}"
     - --target-repo-file="${{ inputs.target-repo-file }}"
     - --github-token="${{ inputs.github-token }}"
