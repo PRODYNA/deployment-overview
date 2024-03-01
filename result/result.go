@@ -28,8 +28,9 @@ Component Status overview. Last update {{.LastUpdated}}
 ## [{{.Name}}]({{.Link}}) {{.LatestRelease.Tag}}
 
 {{if .Error}}
-Error: {{.Error}}
-{{else}}
+> [!WARNING]  
+> {{.Error}}
+{{end}}
 
 {{if .Commits.Count}}
 ### [Commits on {{.DefaultBranch}} since {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})
