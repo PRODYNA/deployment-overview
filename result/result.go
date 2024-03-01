@@ -207,7 +207,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			slog.ErrorContext(ctx, "Unable to list workflows", "organization", config.Organization, "repository", rep, "error", err)
 			repository.Error = err.Error()
 		} else {
-			repository.Workflows.Link = fmt.Sprintf("https://github.com/%s/%s/actions", config.Organization, rep)
+			repository.Workflows.Link = fmt.Sprintf("https://github.com/%s/%s/actions?query=is%%3Awaiting", config.Organization, rep)
 			for _, workflowrun := range workflows.WorkflowRuns {
 				repository.Workflows.Workflows = append(repository.Workflows.Workflows, Worfklow{
 					Name:      workflowrun.GetDisplayTitle(),
