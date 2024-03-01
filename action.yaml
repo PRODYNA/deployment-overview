@@ -2,14 +2,17 @@ name: 'Deployment overview'
 description: 'Create an overview MD file in the root of the repository'
 author: darko.krizic@prodyna.com
 inputs:
-  status-repos:
-    description: 'List of the repositories to monitor'
+  repositories:
+    description: 'The list of repositories to monitor'
     required: true
-    default: ''
   environments:
     description: 'The list of environments to monitor'
     required: true
     default: 'dev,staging,prod'
+  verbose:
+    description: 'The verbosity level'
+    required: true
+    default: 1
   target-repo:
     description: 'The repository where the overview will be written to'
     required: true
@@ -21,9 +24,14 @@ inputs:
   github-token:
     description: 'The token to use for the GitHub API'
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.who-to-greet }}
+    - --organization=${{ inputs.organization }}
+    - --repositories=${{ inputs.repositories }}
+    - --environments=${{ inputs.environments }}
+    - --verbose=${{ inputs.verbose }}
+    - --target-repo=${{ inputs.target-repo }}
+    - --target-repo-file=${{ inputs.target-repo-file }}
+    - --github-token=${{ inputs.github-token }}
