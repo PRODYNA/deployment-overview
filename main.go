@@ -18,6 +18,11 @@ func main() {
 		slog.ErrorContext(ctx, "Unable to create configuration", "error", err)
 		return
 	}
+	err = config.Validate()
+	if err != nil {
+		slog.ErrorContext(ctx, "Invalid configuration", "error", err)
+		return
+	}
 	slog.InfoContext(ctx, "Configuration",
 		"Organization", config.Organization,
 		"Repositories", config.RepositoriesAsList(),
