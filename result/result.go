@@ -20,22 +20,21 @@ var markdownTemplate = `
 Component Status overview. Last update {{.LastUpdated}}
 
 {{range .Repositories}}
-## [{{.Name}}]({{.Link}})
+## [{{.Name}}]({{.Link}}) {{.LatestRelease.Tag}}
 
 {{if .Error}}
 Error: {{.Error}}
 {{else}}
-- Latest Release: {{.LatestRelease.Title}}
 
 {{if .Commits.Count}}
-### [Commits on {{.DefaultBranch}} after tag {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})
+### [Commits on {{.DefaultBranch}} since {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})
 {{range .Commits.Commits}}
 - [{{.Text}}]({{.Link}}) by [{{.Author.Name}}]({{.Author.Link}}) on {{.Timestamp}}
 {{end}}
 {{end}}
 
 {{if .PullRequests.Count}}
-### [Pull Requests]({{.PullRequests.Link}}) ({{.PullRequests.Count}})
+### [Open Pull Requests]({{.PullRequests.Link}}) ({{.PullRequests.Count}})
 {{range .PullRequests.PullRequests}}
 - [{{.Title}}]({{.Link}})
 {{end}}
@@ -46,13 +45,20 @@ Error: {{.Error}}
 | Environment | {{range .Environments}} {{.Name}} | {{end}}
 | --- | {{range .Environments}} --- | {{end}}
 | Version | {{range .Environments}} {{.Version}} | {{end}}
-| Release | {{range .Environments}} {{if .IsRelease}}:heavy_check_mark:{{else}}:x:{{end}} | {{end}}
-| Current | {{range .Environments}} {{if .IsCurrent}}:heavy_check_mark:{{else}}:x:{{end}} | {{end}}
+| Release | {{range .Environments}} {{if .IsRelease}}:green_square:{{else}}:red_square:{{end}} | {{end}}
+| Current | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} | {{end}}
 
 {{if .Releases}}
 ### Last releases
 {{range .Releases }}
 - [{{.Title}}]({{.Link}}) on {{.Timestamp}}
+{{end}}
+{{end}}
+
+{{if .Workflows.Count}}
+### [Workflows]({{.Workflows.Link}}) ({{.Workflows.Count}})
+{{range .Workflows.Workflows}}
+- [{{.Name}}]({{.Link}})
 {{end}}
 {{end}}
 {{end}}
@@ -84,6 +90,7 @@ type Repository struct {
 	Commits       Commits       `json:"commits"`
 	DefaultBranch string        `json:"defaultBranch"`
 	Tags          []Tag         `json:"tags"`
+	Workflows     Workflows     `json:"workflows"`
 }
 
 type Tag struct {
@@ -108,6 +115,17 @@ type Commit struct {
 	Author    Author           `json:"author"`
 	Timestamp github.Timestamp `json:"timestamp"`
 	Link      string           `json:"link"`
+}
+
+type Workflows struct {
+	Link      string     `json:"link"`
+	Count     int        `json:"count"`
+	Workflows []Worfklow `json:"workflows"`
+}
+
+type Worfklow struct {
+	Name string `json:"name"`
+	Link string `json:"link"`
 }
 
 type Environment struct {
@@ -179,6 +197,25 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			}
 		}
 
+		// get all workflows
+		workflows, _, err := gh.Actions.ListRepositoryWorkflowRuns(ctx, config.Organization, rep, &github.ListWorkflowRunsOptions{
+			ListOptions: github.ListOptions{PerPage: 100},
+			Status:      "action_required",
+		})
+		if err != nil {
+			slog.ErrorContext(ctx, "Unable to list workflows", "organization", config.Organization, "repository", rep, "error", err)
+			repository.Error = err.Error()
+		} else {
+			repository.Workflows.Link = fmt.Sprintf("github.com/%s/%s/actions", config.Organization, rep)
+			for _, workflowrun := range workflows.WorkflowRuns {
+				repository.Workflows.Workflows = append(repository.Workflows.Workflows, Worfklow{
+					Name: workflowrun.GetName(),
+					Link: fmt.Sprintf(workflowrun.GetHTMLURL()),
+				})
+			}
+			repository.Workflows.Count = len(repository.Workflows.Workflows)
+		}
+
 		// check if the repository has open pull requests
 		pulls, _, err := gh.PullRequests.List(ctx, config.Organization, rep, &github.PullRequestListOptions{State: "open"})
 		if err != nil {
@@ -205,7 +242,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			repository.Error = err.Error()
 		} else {
 			repository.Commits.Count = len(commits)
-			repository.Commits.Link = fmt.Sprintf("https://github.com/%s/%s/commits/%s", config.Organization, rep, repository.LatestRelease.Tag)
+			repository.Commits.Link = fmt.Sprintf("https://github.com/%s/%s/compare/%s..HEAD", config.Organization, rep, repository.LatestRelease.Tag)
 			for _, commit := range commits {
 				message := commit.GetCommit().GetMessage()
 				firstLine := strings.Split(message, "\n")[0]
