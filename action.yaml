@@ -2,6 +2,9 @@ name: 'Deployment overview'
 description: 'Create an overview MD file in the root of the repository'
 author: darko.krizic@prodyna.com
 inputs:
+  organization:
+      description: 'The organization to monitor'
+      required: true
   repositories:
     description: 'The list of repositories to monitor'
     required: true
@@ -28,10 +31,10 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - --organization="${{ inputs.organization }}"
-    - --repositories="${{ inputs.repositories }}"
-    - --environments="${{ inputs.environments }}"
+    - --organization=${{ inputs.organization }}
+    - --repositories=${{ inputs.repositories }}
+    - --environments=${{ inputs.environments }}
     - --verbose=${{ inputs.verbose }}
-    - --target-repository="${{ inputs.target-repository }}"
-    - --target-repository-file="${{ inputs.target-repository-file }}"
-    - --github-token="${{ inputs.github-token }}"
+    - --target-repository=${{ inputs.target-repository }}
+    - --target-repository-file="${{ inputs.target-repository-file }}
+    - --github-token=${{ inputs.github-token }}
