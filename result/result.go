@@ -56,7 +56,7 @@ Error: {{.Error}}
 {{end}}
 
 {{if .Workflows.Count}}
-### [Workflows]({{.Workflows.Link}}) ({{.Workflows.Count}})
+### [Workflows requiring approval]({{.Workflows.Link}}) ({{.Workflows.Count}})
 {{range .Workflows.Workflows}}
 - [{{.Name}}]({{.Link}})
 {{end}}
