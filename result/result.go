@@ -290,7 +290,25 @@ func (repository *Repository) IterateEnvironments(ctx context.Context, gh *githu
 		}
 
 		for _, deployment := range deployments {
-			if deployment.Environment != nil && *deployment.Environment == env {
+			if deployment.GetEnvironment() == env {
+
+				// get the status for this deployment
+				statuses, _, err := gh.Repositories.ListDeploymentStatuses(ctx, config.Organization, repository.Name, deployment.GetID(), nil)
+				if err != nil {
+					slog.ErrorContext(ctx, "Unable to list deployment statuses", "organization", config.Organization, "repository", repository.Name, "error", err)
+					environment.Version = err.Error()
+					continue
+				}
+				var thisStatus *github.DeploymentStatus
+				for _, status := range statuses {
+					if status.GetState() == "success" {
+						thisStatus = status
+					}
+				}
+				if thisStatus == nil {
+					continue
+				}
+
 				ref := deployment.GetRef()
 				if ref == "master" || ref == "main" {
 					environment.Version = deployment.GetSHA()[0:7]
