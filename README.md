@@ -47,7 +47,33 @@ go buid main.go -o deployment-overview
 
 ## Use as GitHub Action
 
-TODO
+Example on using this action in a workflow:
+
+```yaml
+name: Create Overview
+
+on:
+  workflow_dispatch:
+  # Every day at 07:00
+  schedule:
+    - cron: '0 7 * * *'
+
+jobs:
+  create-overview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment overview
+        uses: prodyna/deployment-overview@v0.1
+        with:
+          organization: myorg
+          target-repository: .github
+          target-repository-file: profile/README.md
+          repositories: frontend,backend,infrastructure
+          environments: dev,staging,prod
+          verbose: 1
+          github-token: ${{ secrets.OVERVIEW_GITHUB_TOKEN }}
+```
+Note that you have to use a GitHub Personal Access Token (PAT) as a secret.
 
 ## Required PAT permissions
 
