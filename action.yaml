@@ -36,5 +36,5 @@ runs:
     - --environments=${{ inputs.environments }}
     - --verbose=${{ inputs.verbose }}
     - --target-repository=${{ inputs.target-repository }}
-    - --target-repository-file="${{ inputs.target-repository-file }}
+    - --target-repository-file=${{ inputs.target-repository-file }}
     - --github-token=${{ inputs.github-token }}
