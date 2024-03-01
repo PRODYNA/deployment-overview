@@ -57,13 +57,17 @@ func main() {
 	}
 
 	// commit to github using the API
+	slog.InfoContext(ctx, "Committing to github", "repository", config.TargetRepository, "organization", config.Organization, "file", config.TargetRepositoryFile)
+	slog.DebugContext(ctx, "Getting target repository", "repository", config.TargetRepository, "organization", config.Organization)
 	repo, _, err := gh.Repositories.Get(ctx, config.Organization, config.TargetRepository)
 	if err != nil {
 		slog.ErrorContext(ctx, "Unable to get target repository", "error", err, "repository", config.TargetRepository, "organization", config.Organization)
 		return
 	}
+	slog.DebugContext(ctx, "Default branch", "branch", *repo.DefaultBranch, "repository", config.TargetRepository, "organization", config.Organization)
 	defaultBranch := *repo.DefaultBranch
 
+	slog.DebugContext(ctx, "Getting branch", "branch", defaultBranch, "repository", config.TargetRepository, "organization", config.Organization)
 	branch, _, err := gh.Repositories.GetBranch(ctx, config.Organization, config.TargetRepository, defaultBranch, 0)
 	if err != nil {
 		slog.ErrorContext(ctx, "Unable to get branch", "error", err, "branch", defaultBranch)
@@ -71,25 +75,65 @@ func main() {
 	}
 	slog.DebugContext(ctx, "Branch", "branch", branch, "repository", config.TargetRepository, "organization", config.Organization)
 
-	//	// create blob
-	//	blob, _, err := gh.Git.CreateBlob(ctx, config.Organization, config.TargetRepository, &github.Blob{
-	//		Content: &md,
-	//		Size:    github.Int(len(md)),
-	//	})
-	//	if err != nil {
-	//		slog.ErrorContext(ctx, "Unable to create blob", "error", err)
-	//		return
-	//	}
-	//
-	//	// create tree
-	//	tree, _, err := gh.Git.CreateTree(ctx, config.Organization, config.TargetRepository, *branch.Commit.SHA, []github.TreeEntry{
-	//		{
-	//			Path: github.String(config.TargetRepositoryFile),
-	//			Mode: github.String("100644"),
-	//			Type: github.String("blob"),
-	//			SHA:  blob.SHA,
-	//		},
-	//,	}
-	//
-	//
+	// create blob
+	slog.DebugContext(ctx, "Creating blob", "repository", config.TargetRepository, "organization", config.Organization, "file", config.TargetRepositoryFile)
+	blob, _, err := gh.Git.CreateBlob(ctx, config.Organization, config.TargetRepository, &github.Blob{
+		Content: &md,
+		Size:    github.Int(len(md)),
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to create blob", "error", err)
+		return
+	}
+	slog.DebugContext(ctx, "Blob created", "repository", config.TargetRepository, "organization", config.Organization)
+
+	treeEntry := []*github.TreeEntry{
+		{
+			Path: github.String(config.TargetRepositoryFile),
+			Mode: github.String("100644"),
+			Type: github.String("blob"),
+			SHA:  blob.SHA,
+		},
+	}
+
+	// create tree
+	slog.DebugContext(ctx, "Creating tree", "repository", config.TargetRepository, "organization", config.Organization)
+	tree, _, err := gh.Git.CreateTree(ctx, config.Organization, config.TargetRepository, *branch.Commit.SHA, treeEntry)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to create tree", "error", err, "repository", config.TargetRepository, "organization", config.Organization)
+		return
+	}
+	slog.DebugContext(ctx, "Tree created", "repository", config.TargetRepository, "organization", config.Organization)
+
+	// create commit
+	slog.DebugContext(ctx, "Creating commit", "repository", config.TargetRepository, "organization", config.Organization)
+	commit, _, err := gh.Git.CreateCommit(ctx, config.Organization, config.TargetRepository, &github.Commit{
+		Message: github.String("Updated deployment overview"),
+		Tree:    tree,
+		Parents: []*github.Commit{
+			{
+				SHA: branch.Commit.SHA,
+			},
+		},
+	}, nil)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to create commit", "error", err, "repository", config.TargetRepository, "organization", config.Organization)
+		return
+	}
+	slog.DebugContext(ctx, "Commit created", "repository", config.TargetRepository, "organization", config.Organization)
+
+	// update branch
+	slog.DebugContext(ctx, "Updating branch", "repository", config.TargetRepository, "organization", config.Organization)
+	_, _, err = gh.Git.UpdateRef(ctx, config.Organization, config.TargetRepository, &github.Reference{
+		Ref: github.String(fmt.Sprintf("refs/heads/%s", defaultBranch)),
+		Object: &github.GitObject{
+			SHA: commit.SHA,
+		},
+	}, false)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to update branch", "error", err, "repository", config.TargetRepository, "organization", config.Organization)
+		return
+	}
+	slog.DebugContext(ctx, "Branch updated", "repository", config.TargetRepository, "organization", config.Organization)
+	slog.InfoContext(ctx, "Updated deployment overview", "repository", config.TargetRepository, "organization", config.Organization)
 }

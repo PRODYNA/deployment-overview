@@ -11,12 +11,13 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"time"
 )
 
 var markdownTemplate = `
 # YASM - Yet Another Skill Management
 
-Component Status overview
+Component Status overview. Last update {{.LastUpdated}}
 
 {{range .Repositories}}
 ## [{{.Name}}]({{.Link}})
@@ -69,6 +70,7 @@ type Release struct {
 type Organization struct {
 	Name         string       `json:"name"`
 	Repositories []Repository `json:"repositories"`
+	LastUpdated  string       `json:"lastUpdated"`
 }
 
 type Repository struct {
@@ -229,6 +231,8 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 
 		organization.Repositories = append(organization.Repositories, repository)
 	}
+
+	organization.LastUpdated = time.Now().Format(time.RFC3339)
 
 	return nil
 }
