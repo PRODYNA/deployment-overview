@@ -30,7 +30,7 @@ Component Status overview. Last update {{.LastUpdated}}
 {{if .Error}}
 > [!WARNING]  
 > {{.Error}}
-{{end}}
+{{else}}
 
 {{if .Commits.Count}}
 ### [Commits on {{.DefaultBranch}} since {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})

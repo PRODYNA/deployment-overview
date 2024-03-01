@@ -1,3 +1,8 @@
+FROM golang:1.22
+
+COPY / /app
+WORKDIR /app
+RUN go build
 # Container image that runs your code
 FROM alpine:3.10
 
