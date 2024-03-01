@@ -28,10 +28,10 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - --organization ${{ inputs.organization }}
-    - --repositories ${{ inputs.repositories }}
-    - --environments ${{ inputs.environments }}
-    - --verbose ${{ inputs.verbose }}
-    - --target-repo ${{ inputs.target-repo }}
-    - --target-repo-file ${{ inputs.target-repo-file }}
-    - --github-token ${{ inputs.github-token }}
+    - -organization ${{ inputs.organization }}
+    - -repositories ${{ inputs.repositories }}
+    - -environments ${{ inputs.environments }}
+    - -verbose ${{ inputs.verbose }}
+    - -target-repo ${{ inputs.target-repo }}
+    - -target-repo-file ${{ inputs.target-repo-file }}
+    - -github-token ${{ inputs.github-token }}
