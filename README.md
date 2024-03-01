@@ -35,15 +35,15 @@ go buid main.go -o deployment-overview
 
 ## Parrameters
 
-| Paramter | Environment | Required | Defaul  | Description |
-| --- | --- |-------| --- | --- |
-| --github-token | GITHUB_TOKEN | true  | - | The GitHub Personal Access Token (PAT) |
-| --environments | ENVIRONMENTS | true  | dev,staging,prod | Environments to query. Comma separated list. |
-| --organization | ORGANIZATION | true  | - | The GitHub Organization to query for repositories. |
-| --repositories | REPOSITORIES | true  | - | Repositories to query. Comma separated list. |
-| --target-repository | TARGET_REPOSITORY | true  | - | The target repository to commit the result to. |
-| --target-repository-file | TARGET_REPOSITORY_FILE | true  | - | The target repository file to commit the result to. |
-| --verbose | VERBOSE | false  | 1 | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| Paramter | Environment | Required | Default | Example                                                                         | Description                                                                   |
+| --- | --- |-------|---------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| --github-token | GITHUB_TOKEN | true  | -       | -                                                                               | The GitHub Personal Access Token (PAT)                                        |
+| --environments | ENVIRONMENTS | true  | -       | dev,staging,prod                                                                | Environments to query. Comma separated list.                                  |
+| --organization | ORGANIZATION | true  | -       | myorga                                                                          | The GitHub Organization to query for repositories.                            |
+| --repositories | REPOSITORIES | true  | -       | frontend,backend                                                                | Repositories to query. Comma separated list.                                  |
+| --target-repository | TARGET_REPOSITORY | true  | -       | .github                                                                         | The target repository to commit the result to.                                |
+| --target-repository-file | TARGET_REPOSITORY_FILE | true  | -       | profile/README.md | The target repository file to commit the result to.                             |
+| --verbose | VERBOSE | false  | 1       | 0 | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
 
 ## Use as GitHub Action
 
