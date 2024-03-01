@@ -58,7 +58,7 @@ Error: {{.Error}}
 {{if .Workflows.Count}}
 ### [Workflows requiring approval]({{.Workflows.Link}}) ({{.Workflows.Count}})
 {{range .Workflows.Workflows}}
-- [{{.Name}}]({{.Link}})
+- [{{.Name}}]({{.Link}}) created on {{.Timestamp}}
 {{end}}
 {{end}}
 {{end}}
@@ -124,8 +124,9 @@ type Workflows struct {
 }
 
 type Worfklow struct {
-	Name string `json:"name"`
-	Link string `json:"link"`
+	Name      string           `json:"name"`
+	Timestamp github.Timestamp `json:"date"`
+	Link      string           `json:"link"`
 }
 
 type Environment struct {
@@ -200,17 +201,18 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 		// get all workflows
 		workflows, _, err := gh.Actions.ListRepositoryWorkflowRuns(ctx, config.Organization, rep, &github.ListWorkflowRunsOptions{
 			ListOptions: github.ListOptions{PerPage: 100},
-			Status:      "action_required",
+			Status:      "waiting",
 		})
 		if err != nil {
 			slog.ErrorContext(ctx, "Unable to list workflows", "organization", config.Organization, "repository", rep, "error", err)
 			repository.Error = err.Error()
 		} else {
-			repository.Workflows.Link = fmt.Sprintf("github.com/%s/%s/actions", config.Organization, rep)
+			repository.Workflows.Link = fmt.Sprintf("https://github.com/%s/%s/actions", config.Organization, rep)
 			for _, workflowrun := range workflows.WorkflowRuns {
 				repository.Workflows.Workflows = append(repository.Workflows.Workflows, Worfklow{
-					Name: workflowrun.GetName(),
-					Link: fmt.Sprintf(workflowrun.GetHTMLURL()),
+					Name:      workflowrun.GetDisplayTitle(),
+					Timestamp: workflowrun.GetCreatedAt(),
+					Link:      fmt.Sprintf(workflowrun.GetHTMLURL()),
 				})
 			}
 			repository.Workflows.Count = len(repository.Workflows.Workflows)
