@@ -13,11 +13,11 @@ inputs:
     description: 'The verbosity level'
     required: true
     default: 1
-  target-repo:
+  target-repository:
     description: 'The repository where the overview will be written to'
     required: true
     default: '.github'
-  target-repo-file:
+  target-repository-file:
     description: 'The file where the overview will be written to'
     required: true
     default: 'profile/README.md'
@@ -32,6 +32,6 @@ runs:
     - --repositories="${{ inputs.repositories }}"
     - --environments="${{ inputs.environments }}"
     - --verbose=${{ inputs.verbose }}
-    - --target-repo="${{ inputs.target-repo }}"
-    - --target-repo-file="${{ inputs.target-repo-file }}"
+    - --target-repository="${{ inputs.target-repository }}"
+    - --target-repository-file="${{ inputs.target-repository-file }}"
     - --github-token="${{ inputs.github-token }}"
