@@ -1,5 +1,15 @@
 # GitHub Action that creates a deployment overview page
 
+This action uses the GitHub API to read various information from the repositories and creates a deployment overview page. 
+The page is exported as JSON and Markdown. The markdown file can be published as .github/profile/README.md, because
+this page is display on the organization main page. The following information is collected:
+
+* The latest release and a list of last releases for each repository
+* The commits that have been done since the last release, this is basically the upcoming changelog once the release is done
+* The pull requests that are open
+* The latest release that have been deployed to the various environments.
+* The actions that are waiting for an approval.
+
 ## Sample output
 
 | Repository | Commits | PRs | Latest Release | [dev](https://dev-yasm.prodyna.com) | [staging](https://dev-yasm.prodyna.com) | [prod](https://yasm.prodyna.com) |
