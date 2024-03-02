@@ -14,100 +14,43 @@ import (
 	"time"
 )
 
-var markdownTemplate = `
-# YASM - Yet Another Skill Management
-
-Component Status overview. Last update {{.LastUpdated}}
-
-| Repository | Commits | PRs | Latest Release | [dev](https://dev-yasm.prodyna.com) | [staging](https://dev-yasm.prodyna.com) | [prod](https://yasm.prodyna.com) |
-| --- | --- | --- | -- | --- | --- | --- |
-{{range .Repositories}}| [{{.Name}}]({{.Link}}) | {{if .Commits.Count}}:red_square:{{else}}:green_square:{{end}} {{.Commits.Count}} | {{if .PullRequests.Count}}:yellow_square:{{else}}:green_square:{{end}} {{.PullRequests.Count}} | {{.LatestRelease.Tag}} | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} {{.Version}} | {{end}}
-{{end}}
-
-{{range .Repositories}}
-## [{{.Name}}]({{.Link}}) {{.LatestRelease.Tag}}
-
-{{if .Error}}
-> [!WARNING]  
-> {{.Error}}
-{{else}}
-
-{{if .Commits.Count}}
-### [Commits on {{.DefaultBranch}} since {{.LatestRelease.Tag}}]({{.Commits.Link}}) ({{.Commits.Count}})
-{{range .Commits.Commits}}
-- [{{.Text}}]({{.Link}}) by [{{.Author.Name}}]({{.Author.Link}}) on {{.Timestamp}}
-{{end}}
-{{end}}
-
-{{if .PullRequests.Count}}
-### [Open Pull Requests]({{.PullRequests.Link}}) ({{.PullRequests.Count}})
-{{range .PullRequests.PullRequests}}
-- [{{.Title}}]({{.Link}})
-{{end}}
-{{end}}
-
-### Environments
-
-| Environment | {{range .Environments}} {{.Name}} | {{end}}
-| --- | {{range .Environments}} --- | {{end}}
-| Version | {{range .Environments}} {{.Version}} | {{end}}
-| Release | {{range .Environments}} {{if .IsRelease}}:green_square:{{else}}:red_square:{{end}} | {{end}}
-| Current | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} | {{end}}
-
-{{if .Releases}}
-### Last releases
-{{range .Releases }}
-- [{{.Title}}]({{.Link}}) on {{.Timestamp}}
-{{end}}
-{{end}}
-
-{{if .Workflows.Count}}
-### [Workflows requiring approval]({{.Workflows.Link}}) ({{.Workflows.Count}})
-{{range .Workflows.Workflows}}
-- [{{.Name}}]({{.Link}}) created on {{.Timestamp}}
-{{end}}
-{{end}}
-{{end}}
-{{end}}
-`
-
 type Release struct {
-	Tag       string           `json:"tag"`
-	SHA       string           `json:"sha"`
-	Title     string           `json:"title"`
-	Timestamp github.Timestamp `json:"timestamp"`
-	Link      string           `json:"link"`
+	Tag       string           `json:"Tag"`
+	SHA       string           `json:"SHA"`
+	Title     string           `json:"Title"`
+	Timestamp github.Timestamp `json:"Timestamp"`
+	Link      string           `json:"Link"`
 }
 
 type Organization struct {
-	Name         string       `json:"name"`
-	Repositories []Repository `json:"repositories"`
-	LastUpdated  string       `json:"lastUpdated"`
+	Title        string       `json:"Title"`
+	Repositories []Repository `json:"Repositories"`
+	LastUpdated  string       `json:"LastUpdated"`
 }
 
 type Repository struct {
-	Name          string        `json:"name"`
-	Error         string        `json:"error"`
-	Environments  []Environment `json:"environments"`
-	LatestRelease Release       `json:"latestRelease"`
-	Releases      []Release     `json:"releases"`
-	PullRequests  PullRequests  `json:"pullRequests"`
-	Link          string        `json:"link"`
-	Commits       Commits       `json:"commits"`
-	DefaultBranch string        `json:"defaultBranch"`
-	Tags          []Tag         `json:"tags"`
-	Workflows     Workflows     `json:"workflows"`
+	Name          string        `json:"Name"`
+	Error         string        `json:"Error"`
+	Environments  []Environment `json:"Environments"`
+	LatestRelease Release       `json:"LatestRelease"`
+	Releases      []Release     `json:"Releases"`
+	PullRequests  PullRequests  `json:"PullRequests"`
+	Link          string        `json:"Link"`
+	Commits       Commits       `json:"Commits"`
+	DefaultBranch string        `json:"DefaultBranch"`
+	Tags          []Tag         `json:"Tags"`
+	Workflows     Workflows     `json:"Workflows"`
 }
 
 type Tag struct {
-	Name string `json:"name"`
-	SHA  string `json:"sha"`
+	Name string `json:"Name"`
+	SHA  string `json:"SHA"`
 }
 
 type Commits struct {
-	Link    string   `json:"link"`
-	Count   int      `json:"count"`
-	Commits []Commit `json:"commits"`
+	Link    string   `json:"Link"`
+	Count   int      `json:"Count"`
+	Commits []Commit `json:"Commits"`
 }
 
 type Author struct {
@@ -116,41 +59,41 @@ type Author struct {
 }
 
 type Commit struct {
-	Text      string           `json:"text"`
-	SHA       string           `json:"sha"`
-	Author    Author           `json:"author"`
-	Timestamp github.Timestamp `json:"timestamp"`
-	Link      string           `json:"link"`
+	Text      string           `json:"Text"`
+	SHA       string           `json:"SHA"`
+	Author    Author           `json:"Author"`
+	Timestamp github.Timestamp `json:"Timestamp"`
+	Link      string           `json:"Link"`
 }
 
 type Workflows struct {
-	Link      string     `json:"link"`
-	Count     int        `json:"count"`
-	Workflows []Worfklow `json:"workflows"`
+	Link      string     `json:"Link"`
+	Count     int        `json:"Count"`
+	Workflows []Worfklow `json:"Workflows"`
 }
 
 type Worfklow struct {
-	Name      string           `json:"name"`
-	Timestamp github.Timestamp `json:"date"`
-	Link      string           `json:"link"`
+	Name      string           `json:"Name"`
+	Timestamp github.Timestamp `json:"Timestamp"`
+	Link      string           `json:"Link"`
 }
 
 type Environment struct {
-	Name      string `json:"name"`
-	Version   string `json:"version"`
-	IsRelease bool   `json:"isRelease"`
-	IsCurrent bool   `json:"isCurrent"`
+	Name      string `json:"Name"`
+	Version   string `json:"Version"`
+	IsRelease bool   `json:"IsRelease"`
+	IsCurrent bool   `json:"IsCurrent"`
 }
 
 type PullRequests struct {
-	Link         string        `json:"link"`
-	Count        int           `json:"count"`
-	PullRequests []PullRequest `json:"pullRequests"`
+	Link         string        `json:"Link"`
+	Count        int           `json:"Count"`
+	PullRequests []PullRequest `json:"PullRequests"`
 }
 
 type PullRequest struct {
-	Title string `json:"title"`
-	Link  string `json:"link"`
+	Title string `json:"Title"`
+	Link  string `json:"Link"`
 }
 
 func (organization *Organization) IterateRepositories(ctx context.Context, gh *github.Client, config config.Config) error {
@@ -347,9 +290,9 @@ func (organization *Organization) RenderJson(ctx context.Context) (result []byte
 	return output, nil
 }
 
-func (organization *Organization) RenderMarkdown(ctx context.Context) (string, error) {
+func (organization *Organization) RenderMarkdown(ctx context.Context, templateContent string) (string, error) {
 	// render the organization to markdown
-	tmpl := template.Must(template.New("organization").Parse(markdownTemplate))
+	tmpl := template.Must(template.New("organization").Parse(templateContent))
 	// execute template to a string
 	var buffer bytes.Buffer
 	err := tmpl.Execute(&buffer, organization)

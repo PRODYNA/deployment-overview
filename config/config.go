@@ -19,6 +19,8 @@ const (
 	keyGithubToken          = "GITHUB_TOKEN"
 	keyEnvironments         = "ENVIRONMENTS"
 	keyVerbose              = "VERBOSE"
+	keyTemplateFile         = "TEMPLATE_FILE"
+	keyTitle                = "TITLE"
 )
 
 type Config struct {
@@ -28,6 +30,8 @@ type Config struct {
 	Repositories         string
 	Environments         string
 	GithubToken          string
+	TemplateFile         string
+	Title                string
 }
 
 func CreateConfig(ctx context.Context) (*Config, error) {
@@ -38,6 +42,8 @@ func CreateConfig(ctx context.Context) (*Config, error) {
 	flag.StringVar(&config.Repositories, "repositories", lookupEnvOrString(keyRepositories, ""), "Repositories to query. Comma separated list.")
 	flag.StringVar(&config.GithubToken, "github-token", lookupEnvOrString(keyGithubToken, ""), "The GitHub Token to use for authentication.")
 	flag.StringVar(&config.Environments, "environments", lookupEnvOrString(keyEnvironments, ""), "Environments to query. Comma separated list.")
+	flag.StringVar(&config.TemplateFile, "template-file", lookupEnvOrString(keyTemplateFile, "template/default.tpl"), "The template file to use for rendering the result. Defaults to 'template/default.tpl'.")
+	flag.StringVar(&config.Title, "title", lookupEnvOrString(keyTitle, "Organization Overview"), "The title to use for the result. Defaults to 'Organization Overview'.")
 	verbose := flag.Int("verbose", lookupEnvOrInt(keyVerbose, 0), "Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE.")
 
 	logLevel := &slog.LevelVar{}
