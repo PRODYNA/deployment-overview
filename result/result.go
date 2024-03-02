@@ -23,9 +23,10 @@ type Release struct {
 }
 
 type Organization struct {
-	Title        string       `json:"Title"`
-	Repositories []Repository `json:"Repositories"`
-	LastUpdated  string       `json:"LastUpdated"`
+	Title                   string                   `json:"Title"`
+	Repositories            []Repository             `json:"Repositories"`
+	EnvironmentDescriptions []EnvironmentDescription `json:"EnvironmentDescription"`
+	LastUpdated             string                   `json:"LastUpdated"`
 }
 
 type Repository struct {
@@ -84,6 +85,11 @@ type Environment struct {
 	Version   string `json:"Version"`
 	IsRelease bool   `json:"IsRelease"`
 	IsCurrent bool   `json:"IsCurrent"`
+}
+
+type EnvironmentDescription struct {
+	Name string `json:"Name"`
+	Link string `json:"Link"`
 }
 
 type PullRequests struct {
@@ -228,10 +234,9 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 
 func (repository *Repository) IterateEnvironments(ctx context.Context, gh *github.Client, config config.Config) (err error) {
 	// split config.environments by comma
-	envLinks := config.EnvironmentLinksAsList()
-	for i, env := range config.EnvironmentsAsList() {
+	for _, env := range config.EnvironmentsAsList() {
 		slog.InfoContext(ctx, "Processing environment", "organization", config.Organization, "repository", repository.Name, "environment", env)
-		environment := Environment{Name: env, Link: envLinks[i]}
+		environment := Environment{Name: env}
 
 		deployments, _, err := gh.Repositories.ListDeployments(ctx, config.Organization, repository.Name, nil)
 		if err != nil {
@@ -303,6 +308,23 @@ func (organization *Organization) RenderMarkdown(ctx context.Context, templateCo
 		return "", err
 	}
 	return buffer.String(), nil
+}
+
+func (organization *Organization) CreateEnvironmentDescriptions(ctx context.Context, c *config.Config) error {
+	envLink := c.EnvironmentLinksAsList()
+	for _, env := range c.EnvironmentsAsList() {
+		environment := EnvironmentDescription{
+			Name: env,
+		}
+		if len(envLink) > 0 {
+			environment.Link = envLink[0]
+			envLink = envLink[1:]
+		} else {
+			slog.WarnContext(ctx, "No link for environment", "environment", env)
+		}
+		organization.EnvironmentDescriptions = append(organization.EnvironmentDescriptions, environment)
+	}
+	return nil
 }
 
 func (repository *Repository) HasTag(tagName string) bool {

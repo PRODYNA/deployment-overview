@@ -24,14 +24,6 @@ func main() {
 		slog.ErrorContext(ctx, "Invalid c", "error", err)
 		return
 	}
-	slog.InfoContext(ctx, "Configuration",
-		"Organization", c.Organization,
-		"Repositories", c.RepositoriesAsList(),
-		"Environments", c.EnvironmentsAsList(),
-		"TargetRepository", c.TargetRepository,
-		"TargetRepositoryFile", c.TargetRepositoryFile,
-		"TemplateFile", c.TemplateFile,
-		"Title", c.Title)
 
 	// try to load the template file
 	template, err := os.ReadFile(c.TemplateFile)
@@ -47,6 +39,7 @@ func main() {
 	}
 
 	organization := &result.Organization{Title: c.Title, Repositories: []result.Repository{}}
+	err = organization.CreateEnvironmentDescriptions(ctx, c)
 	err = organization.IterateRepositories(ctx, gh, *c)
 	if err != nil {
 		slog.ErrorContext(ctx, "Unable to iterate repositories", "error", err)

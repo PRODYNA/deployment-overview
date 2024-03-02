@@ -12,6 +12,10 @@ inputs:
     description: 'The list of environments to monitor'
     required: true
     default: 'dev,staging,prod'
+  environment-links:
+    description: 'The list of links to the environments'
+    required: true
+    default: 'https://dev.example.com,https://staging.example.com,https://prod.example.com'
   verbose:
     description: 'The verbosity level'
     required: true
@@ -42,6 +46,7 @@ runs:
     - --organization=${{ inputs.organization }}
     - --repositories=${{ inputs.repositories }}
     - --environments=${{ inputs.environments }}
+    - --environment-links=${{ inputs.environment-links }}
     - --verbose=${{ inputs.verbose }}
     - --target-repository=${{ inputs.target-repository }}
     - --target-repository-file=${{ inputs.target-repository-file }}
