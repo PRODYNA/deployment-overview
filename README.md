@@ -35,15 +35,17 @@ go buid main.go -o deployment-overview
 
 ## Parrameters
 
-| Paramter | Environment | Required | Default | Example                                                                         | Description                                                                   |
-| --- | --- |-------|---------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| --github-token | GITHUB_TOKEN | true  | -       | -                                                                               | The GitHub Personal Access Token (PAT)                                        |
-| --environments | ENVIRONMENTS | true  | -       | dev,staging,prod                                                                | Environments to query. Comma separated list.                                  |
-| --organization | ORGANIZATION | true  | -       | myorga                                                                          | The GitHub Organization to query for repositories.                            |
-| --repositories | REPOSITORIES | true  | -       | frontend,backend                                                                | Repositories to query. Comma separated list.                                  |
-| --target-repository | TARGET_REPOSITORY | true  | -       | .github                                                                         | The target repository to commit the result to.                                |
-| --target-repository-file | TARGET_REPOSITORY_FILE | true  | -       | profile/README.md | The target repository file to commit the result to.                             |
-| --verbose | VERBOSE | false  | 1       | 0 | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| Paramter | Environment | Required | Default | Example                                                                     | Description                                                                   |
+| --- | --- |-------|---------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| --github-token | GITHUB_TOKEN | true  | -       | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
+| --environments | ENVIRONMENTS | true  | -       | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
+| --organization | ORGANIZATION | true  | -       | myorga                                                                      | The GitHub Organization to query for repositories.                            |
+| --repositories | REPOSITORIES | true  | -       | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
+| --target-repository | TARGET_REPOSITORY | true  | -       | .github                                                                     | The target repository to commit the result to.                                |
+| --target-repository-file | TARGET_REPOSITORY_FILE | true  | -       | profile/README.md                                                           | The target repository file to commit the result to.                             |
+| --verbose | VERBOSE | false  | 1       | 0                                                                           | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| --environment-links | ENVIRONMENT_LINKS | false  | -       | https://dev.example.com,https://staging.example.com,https://www.example.com | Links to the environments. Comma separated list.                             |
+| --template-file | TEMPLATE_FILE | false  | -       | template/default.md                                              | The template file to use.                                                    |
 
 ## Use as GitHub Action
 
@@ -70,7 +72,9 @@ jobs:
           target-repository-file: profile/README.md
           repositories: frontend,backend,infrastructure
           environments: dev,staging,prod
+          environment-links: https://dev.example.com,https://staging.example.com,https://www.example.com
           verbose: 1
+          template-file: template/default.md
           github-token: ${{ secrets.OVERVIEW_GITHUB_TOKEN }}
 ```
 Note that you have to use a GitHub Personal Access Token (PAT) as a secret.
