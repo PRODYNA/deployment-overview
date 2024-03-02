@@ -64,18 +64,35 @@ jobs:
   create-overview:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the existing content of thre repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Create directory profile if it does not exist
+      - name: Create profile directory
+        run: mkdir -p profile
+
+      # Run the deployment overview action
       - name: Deployment overview
-        uses: prodyna/deployment-overview@v0.2
+        uses: prodyna/deployment-overview@v0.3
         with:
-          organization: myorg
-          target-repository: .github
-          target-repository-file: profile/README.md
-          repositories: frontend,backend,infrastructure
+          organization: prodyna-yasm
+          repositories: yasm-backend,yasm-frontend,yasmctl,yasm-proxy-odbc,yasm-integration,yasm-geocoding,yasm-data,yasm-gotenberg
           environments: dev,staging,prod
-          environment-links: https://dev.example.com,https://staging.example.com,https://www.example.com
+          environment-links: https://dev-yasm.prodyna.com,https://staging-yasm.prodyna.com,https://yasm.prodyna.com
           verbose: 1
-          template-file: template/default.md
           github-token: ${{ secrets.OVERVIEW_GITHUB_TOKEN }}
+          title: "YASM Deployment Overview"
+          targetJsonFile: profile/deployment-overview.json
+          targetMdFile: profile/README.md
+
+      # Push the generated files
+      - name: Commit changes
+        run: |
+          git config --local user.email "darko@krizic.net"
+          git config --local user.name "Deployment Overview"
+          git add profile
+          git commit -m "Add/update deployment overview"
 ```
 Note that you have to use a GitHub Personal Access Token (PAT) as a secret.
 
