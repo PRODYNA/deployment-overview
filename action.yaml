@@ -38,7 +38,7 @@ inputs:
   template-file:
     description: 'The template file to use for the overview'
     required: true
-    default: '/gihub/workspace/template/default.tpl'
+    default: '/github/workspace/template/default.tpl'
 runs:
   using: 'docker'
   image: 'Dockerfile'
