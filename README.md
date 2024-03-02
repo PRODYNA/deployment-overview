@@ -31,34 +31,8 @@ See [EXAMPLE.md](EXAMPLE.md) for a full example.
 ## Requirements:
 
 * A GitHub repository or a GitHub organization
-* A GitHub Personal Access Token (PAT)
-* Go 1.22 or later
-
-### Compile the code
-
-```shell
-go buid main.go -o deployment-overview
-```
-
-### Run the code
-
-```shell
-./deployment-overview --github-token <PAT> --organization <organization> --repositories <repository1>,<repository2> --target-repository <target-repository> --target-repository-file <target-repository-file> 
-```
-
-## Parrameters
-
-| Paramter | Environment | Required | Default                  | Example                                                                     | Description                                                                   |
-| --- | --- |-------|--------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| --github-token | GITHUB_TOKEN | true  | -                        | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
-| --environments | ENVIRONMENTS | true  | -                        | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
-| --organization | ORGANIZATION | true  | -                        | myorga                                                                      | The GitHub Organization to query for repositories.                            |
-| --repositories | REPOSITORIES | true  | -                        | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
-| --verbose | VERBOSE | false  | 1                        | 0                                                                           | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
-| --environment-links | ENVIRONMENT_LINKS | false  | -                        | https://dev.example.com,https://staging.example.com,https://www.example.com | Links to the environments. Comma separated list.                             |
-| --template-file | TEMPLATE_FILE | false  | -                        | template/default.md                                              | The template file to use.                                                    |
-| --target-json-file | TARGET_JSON_FILE | false  | deployment-overview.json | -                                                                           | The target file to write the result to as JSON.                               |
-| --target-md-file | TARGET_MD_FILE | false  | deployment-overview.md   | -                                                                           | The target file to write the result to as Markdown.                           |
+* A GitHub Personal Access Token (PAT), see below
+* If using multiple repositories (that is what this action is designed for), the environments of the repositories should be the same like "dev", "staging" and "production".
 
 ## Use as GitHub Action
 
@@ -89,15 +63,25 @@ jobs:
       - name: Deployment overview
         uses: prodyna/deployment-overview@v0.3
         with:
+          # The organization to query
           organization: prodyna-yasm
+          # A comma separated list of repositories to query
           repositories: yasm-backend,yasm-frontend,yasmctl,yasm-proxy-odbc,yasm-integration,yasm-geocoding,yasm-data,yasm-gotenberg
+          # The comma separated list of environments that every repository should have
           environments: dev,staging,prod
+          # A comma separated list of links to the environments
           environment-links: https://dev-yasm.prodyna.com,https://staging-yasm.prodyna.com,https://yasm.prodyna.com
+          # 0=info, 1=debug
           verbose: 1
+          # The GitHub Personal Access Token (PAT)
           github-token: ${{ secrets.OVERVIEW_GITHUB_TOKEN }}
+          # The title for the status page
           title: "YASM Deployment Overview"
+          # The target json file that is written
           target-json-File: profile/deployment-overview.json
+          # The target md file that is written
           target-md-ile: profile/README.md
+          # template-file: set only if you have an own one, otherwise remove this entry to take the default one
           template-file: template/default.md
 
       # Push the generated files
@@ -109,6 +93,35 @@ jobs:
           git commit -m "Add/update deployment overview"
 ```
 Note that you have to use a GitHub Personal Access Token (PAT) as a secret.
+
+## Use as a standalone tool
+
+This action is basically a Go CLI tool that can be run as a standalone tool, this is espcially useful when developing the action.
+
+```shell
+go buid main.go -o deployment-overview
+```
+
+### Run the code
+
+
+```shell
+./deployment-overview --github-token <PAT> --organization <organization> --repositories <repository1>,<repository2> --target-repository <target-repository> --target-repository-file <target-repository-file> 
+```
+
+### Parameters
+
+| Paramter | Environment | Required | Default                  | Example                                                                     | Description                                                                   |
+| --- | --- |-------|--------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| --github-token | GITHUB_TOKEN | true  | -                        | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
+| --environments | ENVIRONMENTS | true  | -                        | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
+| --organization | ORGANIZATION | true  | -                        | myorga                                                                      | The GitHub Organization to query for repositories.                            |
+| --repositories | REPOSITORIES | true  | -                        | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
+| --verbose | VERBOSE | false  | 1                        | 0                                                                           | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| --environment-links | ENVIRONMENT_LINKS | false  | -                        | https://dev.example.com,https://staging.example.com,https://www.example.com | Links to the environments. Comma separated list.                             |
+| --template-file | TEMPLATE_FILE | false  | -                        | template/default.md                                              | The template file to use.                                                    |
+| --target-json-file | TARGET_JSON_FILE | false  | deployment-overview.json | -                                                                           | The target file to write the result to as JSON.                               |
+| --target-md-file | TARGET_MD_FILE | false  | deployment-overview.md   | -                                                                           | The target file to write the result to as Markdown.                           |
 
 ## Required PAT permissions
 
