@@ -27,14 +27,18 @@ inputs:
     description: 'The title of the overview'
     required: true
     default: 'Deployment overview'
-  targetJsonFile:
+  target-json-file:
     description: 'The file to write the JSON to'
     required: false
     default: 'deployment-overview.json'
-  targetMdFile:
+  target-md-file:
     description: 'The file to write the MD to'
     required: false
     default: 'deployment-overview.md'
+  template-file:
+    description: 'The template file to use'
+    required: false
+    default: 'template/default.md'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -47,5 +51,5 @@ runs:
     GITHUB_TOKEN: ${{ inputs.github-token }}
     TITLE: ${{ inputs.title }}
     TEMPLATE_FILE: ${{ inputs.template-file }}
-    TARGET_JSON_FILE: ${{ inputs.targetJsonFile }}
-    TARGET_MD_FILE: ${{ inputs.targetMdFile }}
+    TARGET_JSON_FILE: ${{ inputs.target-json-file }}
+    TARGET_MD_FILE: ${{ inputs.target-md-file }}
