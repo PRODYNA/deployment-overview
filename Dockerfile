@@ -1,6 +1,6 @@
 FROM golang:1.22
 
-COPY /template /
+COPY /template /template
 WORKDIR /app
 COPY . /app
 RUN go build .
