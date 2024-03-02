@@ -1,6 +1,6 @@
 FROM golang:1.22
 
-WORKDIR /app
-COPY . /app
+WORKDIR /github/workspace
+COPY . /github/workspace
 RUN go build .
-ENTRYPOINT ["/app/deployment-overview"]
+ENTRYPOINT ["/github/workspace/deployment-overview"]
