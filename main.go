@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/go-github/v59/github"
 	_ "github.com/google/go-github/v59/github"
 	"github.com/prodyna/deployment-overview/config"
@@ -59,7 +58,14 @@ func do() error {
 		slog.ErrorContext(ctx, "Unable to render organization", "error", err)
 		return err
 	}
-	fmt.Printf("%s\n", json)
+
+	slog.DebugContext(ctx, "Writing json to file", "file", c.TargetJsonFile)
+	err = publish.WriteFile(c.TargetJsonFile, json)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to write json to file", "error", err)
+		return err
+	}
+	slog.InfoContext(ctx, "Wrote json to file", "file", c.TargetJsonFile)
 
 	md, err := organization.RenderMarkdown(ctx, string(template))
 	if err != nil {
@@ -67,11 +73,13 @@ func do() error {
 		return err
 	}
 
-	err = publish.PublishToGitHub(ctx, c, md, gh)
+	slog.DebugContext(ctx, "Writing md to file", "file", c.TargetMdFile)
+	err = publish.WriteFile(c.TargetMdFile, []byte(md))
 	if err != nil {
-		slog.ErrorContext(ctx, "Unable to publish to github", "error", err)
+		slog.ErrorContext(ctx, "Unable to write md to file", "error", err)
 		return err
 	}
+	slog.InfoContext(ctx, "Wrote md to file", "file", c.TargetMdFile)
 
 	return nil
 }

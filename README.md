@@ -35,17 +35,17 @@ go buid main.go -o deployment-overview
 
 ## Parrameters
 
-| Paramter | Environment | Required | Default | Example                                                                     | Description                                                                   |
-| --- | --- |-------|---------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| --github-token | GITHUB_TOKEN | true  | -       | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
-| --environments | ENVIRONMENTS | true  | -       | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
-| --organization | ORGANIZATION | true  | -       | myorga                                                                      | The GitHub Organization to query for repositories.                            |
-| --repositories | REPOSITORIES | true  | -       | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
-| --target-repository | TARGET_REPOSITORY | true  | -       | .github                                                                     | The target repository to commit the result to.                                |
-| --target-repository-file | TARGET_REPOSITORY_FILE | true  | -       | profile/README.md                                                           | The target repository file to commit the result to.                             |
-| --verbose | VERBOSE | false  | 1       | 0                                                                           | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
-| --environment-links | ENVIRONMENT_LINKS | false  | -       | https://dev.example.com,https://staging.example.com,https://www.example.com | Links to the environments. Comma separated list.                             |
-| --template-file | TEMPLATE_FILE | false  | -       | template/default.md                                              | The template file to use.                                                    |
+| Paramter | Environment | Required | Default                  | Example                                                                     | Description                                                                   |
+| --- | --- |-------|--------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| --github-token | GITHUB_TOKEN | true  | -                        | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
+| --environments | ENVIRONMENTS | true  | -                        | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
+| --organization | ORGANIZATION | true  | -                        | myorga                                                                      | The GitHub Organization to query for repositories.                            |
+| --repositories | REPOSITORIES | true  | -                        | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
+| --verbose | VERBOSE | false  | 1                        | 0                                                                           | Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE. |
+| --environment-links | ENVIRONMENT_LINKS | false  | -                        | https://dev.example.com,https://staging.example.com,https://www.example.com | Links to the environments. Comma separated list.                             |
+| --template-file | TEMPLATE_FILE | false  | -                        | template/default.md                                              | The template file to use.                                                    |
+| --target-json-file | TARGET_JSON_FILE | false  | deployment-overview.json | -                                                                           | The target file to write the result to as JSON.                               |
+| --target-md-file | TARGET_MD_FILE | false  | deployment-overview.md   | -                                                                           | The target file to write the result to as Markdown.                           |
 
 ## Use as GitHub Action
 
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deployment overview
-        uses: prodyna/deployment-overview@v0.1
+        uses: prodyna/deployment-overview@v0.2
         with:
           organization: myorg
           target-repository: .github
@@ -86,7 +86,6 @@ The PAT should be a Fine Grain PAT that belongs to the target organization and h
 | Permission | Access |
 | --- | --- |
 | Actions | Read |
-| Contents | Read & Write |
 | Deployments | Read |
 | Environments | Read |
 | Metadata | Read |

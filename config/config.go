@@ -12,35 +12,35 @@ import (
 )
 
 const (
-	keyOrganization         = "ORGANIZATION"
-	keyTargetRepository     = "TARGET_REPOSITORY"
-	keyTargetRepositoryFile = "TARGET_REPOSITORY_FILE"
-	keyRepositories         = "REPOSITORIES"
-	keyGithubToken          = "GITHUB_TOKEN"
-	keyEnvironments         = "ENVIRONMENTS"
-	keyEnvironmentLinks     = "ENVIRONMENT_LINKS"
-	keyVerbose              = "VERBOSE"
-	keyTemplateFile         = "TEMPLATE_FILE"
-	keyTitle                = "TITLE"
+	keyOrganization     = "ORGANIZATION"
+	keyRepositories     = "REPOSITORIES"
+	keyGithubToken      = "GITHUB_TOKEN"
+	keyEnvironments     = "ENVIRONMENTS"
+	keyEnvironmentLinks = "ENVIRONMENT_LINKS"
+	keyVerbose          = "VERBOSE"
+	keyTemplateFile     = "TEMPLATE_FILE"
+	keyTitle            = "TITLE"
+	keyTargetJsonFile   = "TARGET_JSON_FILE"
+	keyTargetMdFile     = "TARGET_MD_FILE"
 )
 
 type Config struct {
-	Organization         string
-	TargetRepository     string
-	TargetRepositoryFile string
-	Repositories         string
-	Environments         string
-	EnvironmentLinks     string
-	GithubToken          string
-	TemplateFile         string
-	Title                string
+	Organization     string
+	TargetJsonFile   string
+	TargetMdFile     string
+	Repositories     string
+	Environments     string
+	EnvironmentLinks string
+	GithubToken      string
+	TemplateFile     string
+	Title            string
 }
 
 func CreateConfig(ctx context.Context) (*Config, error) {
 	c := Config{}
 	flag.StringVar(&c.Organization, "organization", lookupEnvOrString(keyOrganization, ""), "The GitHub Organization to query for repositories.")
-	flag.StringVar(&c.TargetRepository, "target-repository", lookupEnvOrString(keyTargetRepository, ""), "The target repository to commit the result to.")
-	flag.StringVar(&c.TargetRepositoryFile, "target-repository-file", lookupEnvOrString(keyTargetRepositoryFile, ""), "The target repository file to commit the result to.")
+	flag.StringVar(&c.TargetJsonFile, "target-json-file", lookupEnvOrString(keyTargetJsonFile, "deployment-overview.json"), "The target json file to commit the result to.")
+	flag.StringVar(&c.TargetMdFile, "target-md-file", lookupEnvOrString(keyTargetMdFile, "deployment-overview.md"), "The target md file to commit the result to.")
 	flag.StringVar(&c.Repositories, "repositories", lookupEnvOrString(keyRepositories, ""), "Repositories to query. Comma separated list.")
 	flag.StringVar(&c.GithubToken, "github-token", lookupEnvOrString(keyGithubToken, ""), "The GitHub Token to use for authentication.")
 	flag.StringVar(&c.Environments, "environments", lookupEnvOrString(keyEnvironments, ""), "Environments to query. Comma separated list.")
@@ -64,9 +64,9 @@ func CreateConfig(ctx context.Context) (*Config, error) {
 		"Repositories", c.RepositoriesAsList(),
 		"Environments", c.EnvironmentsAsList(),
 		"EnvironmentLinks", c.EnvironmentLinksAsList(),
-		"TargetRepository", c.TargetRepository,
-		"TargetRepositoryFile", c.TargetRepositoryFile,
 		"TemplateFile", c.TemplateFile,
+		"TargetJsonFile", c.TargetJsonFile,
+		"TargetMdFile", c.TargetMdFile,
 		"Title", c.Title)
 
 	return &c, nil
@@ -83,14 +83,6 @@ func (c *Config) Validate() error {
 
 	if c.Repositories == "" {
 		return errors.New("Repositories is required")
-	}
-
-	if c.TargetRepository == "" {
-		return errors.New("Target Repository is required")
-	}
-
-	if c.TargetRepositoryFile == "" {
-		return errors.New("Target Repository File is required")
 	}
 
 	return nil

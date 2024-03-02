@@ -20,14 +20,6 @@ inputs:
     description: 'The verbosity level'
     required: true
     default: 1
-  target-repository:
-    description: 'The repository where the overview will be written to'
-    required: true
-    default: '.github'
-  target-repository-file:
-    description: 'The file where the overview will be written to'
-    required: true
-    default: 'profile/README.md'
   github-token:
     description: 'The token to use for the GitHub API'
     required: true
@@ -35,10 +27,14 @@ inputs:
     description: 'The title of the overview'
     required: true
     default: 'Deployment overview'
-  template-file:
-    description: 'The template file to use for the overview'
-    required: true
-    default: '/template/default.tpl'
+  targetJsonFile:
+    description: 'The file to write the JSON to'
+    required: false
+    default: 'deployment-overview.json'
+  targetMdFile:
+    description: 'The file to write the MD to'
+    required: false
+    default: 'deployment-overview.md'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -48,8 +44,8 @@ runs:
     ENVIRONMENTS: ${{ inputs.environments }}
     ENVIRONMENT_LINKS: ${{ inputs.environment-links }}
     VERBOSE: ${{ inputs.verbose }}
-    TARGET_REPOSITORY: ${{ inputs.target-repository }}
-    TARGET_REPOSITORY_FILE: ${{ inputs.target-repository-file }}
     GITHUB_TOKEN: ${{ inputs.github-token }}
     TITLE: ${{ inputs.title }}
     TEMPLATE_FILE: ${{ inputs.template-file }}
+    TARGET_JSON_FILE: ${{ inputs.targetJsonFile }}
+    TARGET_MD_FILE: ${{ inputs.targetMdFile }}

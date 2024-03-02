@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-github/v59/github"
 	"github.com/prodyna/deployment-overview/config"
 	"log/slog"
-	"os"
 	"strings"
 	"text/template"
 	"time"
@@ -293,7 +292,6 @@ func (organization *Organization) RenderJson(ctx context.Context) (result []byte
 		slog.ErrorContext(ctx, "Unable to render organization", "error", err)
 		return nil, err
 	}
-	os.Stdout.Write(output)
 	return output, nil
 }
 
