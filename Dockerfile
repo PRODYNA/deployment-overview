@@ -4,4 +4,4 @@ COPY template /github/workspace/template
 WORKDIR /app
 COPY . /app
 RUN go build .
-ENTRYPOINT ["/github/workspace/deployment-overview"]
+ENTRYPOINT ["/app/deployment-overview"]
