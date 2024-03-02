@@ -10,6 +10,9 @@ this page is display on the organization main page. The following information is
 * The latest release that have been deployed to the various environments.
 * The actions that are waiting for an approval.
 
+This action brings a default template [default.md](template/default.md) that can be used as a starting point.
+If the template is not specified, this default one is used. It can be copied and modified to fit the needs of the organization.
+
 ## Sample output
 
 | Repository | Commits | PRs | Latest Release | [dev](https://dev-yasm.prodyna.com) | [staging](https://dev-yasm.prodyna.com) | [prod](https://yasm.prodyna.com) |
