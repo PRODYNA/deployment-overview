@@ -52,3 +52,9 @@ Component Status overview. Last update {{.LastUpdated}}
 {{end}}
 {{end}}
 {{end}}
+
+---
+
+Created with :heart: by the GitHub Action [deployment-overview](https://github.com/prodyna/deployment-overview) by [@dkrizic](https://github.com/dkrizic)
+
+`
