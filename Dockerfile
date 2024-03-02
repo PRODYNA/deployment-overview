@@ -1,7 +1,6 @@
 FROM golang:1.22
 
-COPY template /github/workspace/template
-RUN find /github/workspace -print
+COPY /template /
 WORKDIR /app
 COPY . /app
 RUN go build .

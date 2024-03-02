@@ -38,18 +38,18 @@ inputs:
   template-file:
     description: 'The template file to use for the overview'
     required: true
-    default: '/github/workspace/template/default.tpl'
+    default: '/template/default.tpl'
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - --organization=${{ inputs.organization }}
-    - --repositories=${{ inputs.repositories }}
-    - --environments=${{ inputs.environments }}
-    - --environment-links=${{ inputs.environment-links }}
-    - --verbose=${{ inputs.verbose }}
-    - --target-repository=${{ inputs.target-repository }}
-    - --target-repository-file=${{ inputs.target-repository-file }}
-    - --github-token=${{ inputs.github-token }}
-    - --title=${{ inputs.title }}
-    - --template-file=${{ inputs.template-file }}
+  env:
+    ORGANIZATION: ${{ inputs.organization }}
+    REPOSITORIES: ${{ inputs.repositories }}
+    ENVIRONMENTS: ${{ inputs.environments }}
+    ENVIRONMENT_LINKS: ${{ inputs.environment-links }}
+    VERBOSE: ${{ inputs.verbose }}
+    TARGET_REPOSITORY: ${{ inputs.target-repository }}
+    TARGET_REPOSITORY_FILE: ${{ inputs.target-repository-file }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    TITLE: ${{ inputs.title }}
+    TEMPLATE_FILE: ${{ inputs.template-file }}
