@@ -27,6 +27,14 @@ inputs:
   github-token:
     description: 'The token to use for the GitHub API'
     required: true
+  title:
+    description: 'The title of the overview'
+    required: true
+    default: 'Deployment overview'
+  template-file:
+    description: 'The template file to use for the overview'
+    required: true
+    default: 'template/default.tpl'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -38,3 +46,5 @@ runs:
     - --target-repository=${{ inputs.target-repository }}
     - --target-repository-file=${{ inputs.target-repository-file }}
     - --github-token=${{ inputs.github-token }}
+    - --title=${{ inputs.title }}
+    - --template-file=${{ inputs.template-file }}
