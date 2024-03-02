@@ -80,6 +80,7 @@ type Worfklow struct {
 
 type Environment struct {
 	Name      string `json:"Name"`
+	Link      string `json:"Link"`
 	Version   string `json:"Version"`
 	IsRelease bool   `json:"IsRelease"`
 	IsCurrent bool   `json:"IsCurrent"`
@@ -227,9 +228,10 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 
 func (repository *Repository) IterateEnvironments(ctx context.Context, gh *github.Client, config config.Config) (err error) {
 	// split config.environments by comma
-	for _, env := range config.EnvironmentsAsList() {
+	envLinks := config.EnvironmentLinksAsList()
+	for i, env := range config.EnvironmentsAsList() {
 		slog.InfoContext(ctx, "Processing environment", "organization", config.Organization, "repository", repository.Name, "environment", env)
-		environment := Environment{Name: env}
+		environment := Environment{Name: env, Link: envLinks[i]}
 
 		deployments, _, err := gh.Repositories.ListDeployments(ctx, config.Organization, repository.Name, nil)
 		if err != nil {
