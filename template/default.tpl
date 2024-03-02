@@ -4,7 +4,7 @@ Component Status overview. Last update {{.LastUpdated}}
 
 | Repository | Commits | PRs | Latest Release | {{ range .EnvironmentDescriptions }} [{{.Name}}]({{.Link}}) | {{end}}
 | --- | --- | --- | -- | {{ range .EnvironmentDescriptions }} --- | {{end}}
-{{range .Repositories}}| [{{.Name}}]({{.Link}}) | {if .Commits.Count}}:red_square:{{else}}:green_square:{{end}} [{{.Commits.Count}}]({{.Commits.Link}}) | {{if .PullRequests.Count}}:yellow_square:{{else}}:green_square:{{end}} [{{.PullRequests.Count}}]({{.PullRequests.Link}} | {{.LatestRelease.Tag}} | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} {{.Version}} | {{end}}
+{{range .Repositories}}| [{{.Name}}]({{.Link}}) | {if .Commits.Count}}:red_square:{{else}}:green_square:{{end}} [{{.Commits.Count}}]({{.Commits.Link}}) | {{if .PullRequests.Count}}:yellow_square:{{else}}:green_square:{{end}} [{{.PullRequests.Count}}]({{.PullRequests.Link}}) | {{.LatestRelease.Tag}} | {{range .Environments}} {{if .IsCurrent}}:green_square:{{else}}:red_square:{{end}} {{.Version}} | {{end}}
 {{end}}
 
 {{range .Repositories}}
