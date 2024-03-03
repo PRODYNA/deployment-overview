@@ -17,3 +17,17 @@ jobs:
 
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag ghcr.io/deprodyna/deployment-overview:latest
+
+    # if tag, get the tag as variable
+    - name: Set env
+      run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    # if tagged, create docker tag
+    - name: Create a tag for the Docker image
+      if: github.ref == 'refs/heads/main'
+      run: docker tag ghcr.io/deprodyna/deployment-overview:latest ghcr.io/deprodyna/deployment-overview:${{ env.tag }}
+
+    # if tagged, push the image to the GitHub Container Registry
+    - name: Push the Docker image to the GitHub Container Registry
+      if: github.ref == 'refs/heads/main'
+      run: docker push ghcr.io/deprodyna/deployment-overview:${{ env.tag }}
