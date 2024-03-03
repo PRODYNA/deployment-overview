@@ -41,7 +41,7 @@ inputs:
     default: '/template/default.tpl'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'docker://ghcr.io/dkrizic/deployment-overview:v0.4'
   env:
     ORGANIZATION: ${{ inputs.organization }}
     REPOSITORIES: ${{ inputs.repositories }}
