@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	windowSize = 50
+)
+
 type Release struct {
 	Tag       string           `json:"Tag"`
 	SHA       string           `json:"SHA"`
@@ -155,7 +159,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 
 		// get all workflows
 		workflows, _, err := gh.Actions.ListRepositoryWorkflowRuns(ctx, config.Organization, rep, &github.ListWorkflowRunsOptions{
-			ListOptions: github.ListOptions{PerPage: 100},
+			ListOptions: github.ListOptions{PerPage: windowSize},
 			Status:      "waiting",
 		})
 		if err != nil {
@@ -254,8 +258,18 @@ func (repository *Repository) IterateEnvironments(ctx context.Context, gh *githu
 					environment.Version = err.Error()
 					continue
 				}
+				// create a comma separated list of statuses
+				stati := make([]string, 0)
+				for _, status := range statuses {
+					stati = append(stati, status.GetState())
+				}
+
+				slog.DebugContext(ctx, "Deployment", "organization", config.Organization, "repository", repository.Name, "environment", env, "deployment", deployment.GetID(), slog.Any("stati", stati), slog.Any("ref", deployment.GetRef()))
 				var thisStatus *github.DeploymentStatus
 				for _, status := range statuses {
+					if status.GetState() == "error" {
+						continue
+					}
 					if status.GetState() == "success" {
 						thisStatus = status
 					}

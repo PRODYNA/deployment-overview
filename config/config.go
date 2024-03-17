@@ -49,15 +49,16 @@ func CreateConfig(ctx context.Context) (*Config, error) {
 	flag.StringVar(&c.Title, "title", lookupEnvOrString(keyTitle, "Organization Overview"), "The title to use for the result. Defaults to 'Organization Overview'.")
 	verbose := flag.Int("verbose", lookupEnvOrInt(keyVerbose, 0), "Verbosity level, 0=info, 1=debug. Overrides the environment variable VERBOSE.")
 
-	logLevel := &slog.LevelVar{}
-	if verbose != nil {
-		if *verbose == 0 {
-			logLevel.Set(slog.LevelInfo)
-		} else {
-			logLevel.Set(slog.LevelDebug)
-		}
-	}
 	flag.Parse()
+	level := slog.LevelInfo
+	if *verbose == 1 {
+		level = slog.LevelDebug
+	}
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
+	handler := slog.New(slog.NewTextHandler(os.Stderr, opts))
+	slog.SetDefault(handler)
 
 	slog.InfoContext(ctx, "Configuration",
 		"Organization", c.Organization,
