@@ -252,7 +252,7 @@ func (repository *Repository) IterateEnvironments(ctx context.Context, gh *githu
 			if deployment.GetEnvironment() == env {
 
 				// get the status for this deployment
-				statuses, _, err := gh.Repositories.ListDeploymentStatuses(ctx, config.Organization, repository.Name, deployment.GetID(), nil)
+				statuses, _, err := gh.Repositories.ListDeploymentStatuses(ctx, config.Organization, repository.Name, deployment.GetID(), &github.ListOptions{PerPage: 100})
 				if err != nil {
 					slog.ErrorContext(ctx, "Unable to list deployment statuses", "organization", config.Organization, "repository", repository.Name, "error", err)
 					environment.Version = err.Error()
