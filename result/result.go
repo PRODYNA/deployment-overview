@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/prodyna/deployment-overview/config"
 	"log/slog"
 	"strings"
@@ -113,7 +113,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 		slog.InfoContext(ctx, "Processing repository", "organization", config.Organization, "repository", rep)
 		repository := Repository{
 			Name: rep,
-			Link: fmt.Sprintf("https://github.com/%s/%s", config.Organization, rep),
+			Link: fmt.Sprintf("%s/%s/%s", strings.TrimRight(config.GithubServerURL, "/"), config.Organization, rep),
 		}
 
 		repo, _, err := gh.Repositories.Get(ctx, config.Organization, rep)
@@ -149,7 +149,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 					Tag:       release.GetTagName(),
 					Title:     release.GetName(),
 					Link:      release.GetHTMLURL(),
-					Timestamp: *release.CreatedAt,
+					Timestamp: release.CreatedAt,
 				})
 				if i == 2 {
 					break
@@ -166,12 +166,12 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			slog.ErrorContext(ctx, "Unable to list workflows", "organization", config.Organization, "repository", rep, "error", err)
 			repository.Error = err.Error()
 		} else {
-			repository.Workflows.Link = fmt.Sprintf("https://github.com/%s/%s/actions?query=is%%3Awaiting", config.Organization, rep)
+			repository.Workflows.Link = fmt.Sprintf("%s/%s/%s/actions?query=is%%3Awaiting", strings.TrimRight(config.GithubServerURL, "/"), config.Organization, rep)
 			for _, workflowrun := range workflows.WorkflowRuns {
 				repository.Workflows.Workflows = append(repository.Workflows.Workflows, Worfklow{
 					Name:      workflowrun.GetDisplayTitle(),
 					Timestamp: workflowrun.GetCreatedAt(),
-					Link:      fmt.Sprintf(workflowrun.GetHTMLURL()),
+					Link:      workflowrun.GetHTMLURL(),
 				})
 			}
 			repository.Workflows.Count = len(repository.Workflows.Workflows)
@@ -184,7 +184,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			repository.Error = err.Error()
 		} else {
 			repository.PullRequests.Count = len(pulls)
-			repository.PullRequests.Link = fmt.Sprintf("https://github.com/%s/%s/pulls", config.Organization, rep)
+			repository.PullRequests.Link = fmt.Sprintf("%s/%s/%s/pulls", strings.TrimRight(config.GithubServerURL, "/"), config.Organization, rep)
 
 			for _, pull := range pulls {
 				repository.PullRequests.PullRequests = append(repository.PullRequests.PullRequests, PullRequest{
@@ -203,7 +203,7 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 			repository.Error = err.Error()
 		} else {
 			repository.Commits.Count = len(commits)
-			repository.Commits.Link = fmt.Sprintf("https://github.com/%s/%s/compare/%s..HEAD", config.Organization, rep, repository.LatestRelease.Tag)
+			repository.Commits.Link = fmt.Sprintf("%s/%s/%s/compare/%s..HEAD", strings.TrimRight(config.GithubServerURL, "/"), config.Organization, rep, repository.LatestRelease.Tag)
 			for _, commit := range commits {
 				message := commit.GetCommit().GetMessage()
 				firstLine := strings.Split(message, "\n")[0]
@@ -212,10 +212,10 @@ func (organization *Organization) IterateRepositories(ctx context.Context, gh *g
 					SHA:  commit.GetSHA(),
 					Author: Author{
 						Name: commit.GetAuthor().GetLogin(),
-						Link: fmt.Sprintf("https://github.com/%s", commit.GetAuthor().GetLogin()),
+						Link: fmt.Sprintf("%s/%s", strings.TrimRight(config.GithubServerURL, "/"), commit.GetAuthor().GetLogin()),
 					},
 					Timestamp: commit.GetCommit().GetAuthor().GetDate(),
-					Link:      fmt.Sprintf("https://github.com/%s/%s/commit/%s", config.Organization, rep, commit.GetSHA()),
+					Link:      fmt.Sprintf("%s/%s/%s/commit/%s", strings.TrimRight(config.GithubServerURL, "/"), config.Organization, rep, commit.GetSHA()),
 				})
 			}
 		}

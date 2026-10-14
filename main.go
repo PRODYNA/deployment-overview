@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/google/go-github/v59/github"
-	_ "github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/prodyna/deployment-overview/config"
 	"github.com/prodyna/deployment-overview/publish"
 	"github.com/prodyna/deployment-overview/result"
@@ -39,9 +38,12 @@ func do() error {
 		return err
 	}
 
-	gh := github.NewClient(nil).WithAuthToken(c.GithubToken)
-	if gh == nil {
-		slog.ErrorContext(ctx, "Unable to create github client")
+	gh, err := github.NewClient(
+		github.WithEnterpriseURLs(c.GithubAPIURL, c.GithubAPIURL),
+		github.WithAuthToken(c.GithubToken),
+	)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to create github client", "error", err)
 		return err
 	}
 

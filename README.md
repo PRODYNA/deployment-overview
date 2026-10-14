@@ -75,6 +75,9 @@ jobs:
           verbose: 1
           # The GitHub Personal Access Token (PAT)
           github-token: ${{ secrets.OVERVIEW_GITHUB_TOKEN }}
+          # Optional: use a GitHub Enterprise API and web URL
+          # github-api-url: https://api.prodyna.ghe.com/
+          # github-server-url: https://prodyna.ghe.com
           # The title for the status page
           title: "YASM Deployment Overview"
           # The target json file that is written
@@ -114,6 +117,8 @@ go buid main.go -o deployment-overview
 | Paramter | Environment | Required | Default                  | Example                                                                     | Description                                                                   |
 | --- | --- |-------|--------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
 | --github-token | GITHUB_TOKEN | true  | -                        | -                                                                           | The GitHub Personal Access Token (PAT)                                        |
+| --github-api-url | GITHUB_API_URL | false | https://api.github.com/ | https://api.prodyna.ghe.com/ | GitHub REST API base URL. Set this to the Enterprise API URL when using GitHub Enterprise. |
+| --github-server-url | GITHUB_SERVER_URL | false | https://github.com | https://prodyna.ghe.com | GitHub web URL used to generate repository, pull request, commit, and workflow links; set this alongside the API URL for GitHub Enterprise. |
 | --environments | ENVIRONMENTS | true  | -                        | dev,staging,prod                                                            | Environments to query. Comma separated list.                                  |
 | --organization | ORGANIZATION | true  | -                        | myorga                                                                      | The GitHub Organization to query for repositories.                            |
 | --repositories | REPOSITORIES | true  | -                        | frontend,backend                                                            | Repositories to query. Comma separated list.                                  |
