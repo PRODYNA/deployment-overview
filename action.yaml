@@ -23,6 +23,14 @@ inputs:
   github-token:
     description: 'The token to use for the GitHub API'
     required: true
+  github-api-url:
+    description: 'The GitHub API URL'
+    required: false
+    default: 'https://api.github.com/'
+  github-server-url:
+    description: 'The GitHub web URL used for generated links'
+    required: false
+    default: 'https://github.com'
   title:
     description: 'The title of the overview'
     required: true
@@ -41,7 +49,7 @@ inputs:
     default: '/template/default.tpl'
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/prodyna/deployment-overview:v0.7'
+  image: 'Dockerfile'
   env:
     ORGANIZATION: ${{ inputs.organization }}
     REPOSITORIES: ${{ inputs.repositories }}
@@ -49,6 +57,8 @@ runs:
     ENVIRONMENT_LINKS: ${{ inputs.environment-links }}
     VERBOSE: ${{ inputs.verbose }}
     GITHUB_TOKEN: ${{ inputs.github-token }}
+    GITHUB_API_URL: ${{ inputs.github-api-url }}
+    GITHUB_SERVER_URL: ${{ inputs.github-server-url }}
     TITLE: ${{ inputs.title }}
     TEMPLATE_FILE: ${{ inputs.template-file }}
     TARGET_JSON_FILE: ${{ inputs.target-json-file }}
